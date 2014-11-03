@@ -33,6 +33,7 @@ public class DeveloperUtilities {
         for (int i = 0; i < 200; i++){
             TestData data = new TestData();
             data.setTestValue(i + 1);
+            data.setTestString("This is a test string " + String.valueOf(1+1));
             try {
                 logger.log("Creating test object " + String.valueOf(i));
                 data.save();
@@ -44,8 +45,8 @@ public class DeveloperUtilities {
 
     private ParseQuery<TestData> getQuery(Integer queryCount) {
         ParseQuery<TestData> query = ParseQuery.getQuery(TestData.class);
-        query.whereLessThan(TestData.Field_TestValue, queryCount + 10);
-        query.whereGreaterThan(TestData.Field_TestValue, queryCount - 10);
+        //query.whereLessThan(TestData.Field_TestValue, queryCount + 10);
+        //query.whereGreaterThan(TestData.Field_TestValue, 0);
         return query;
     }
 
@@ -88,7 +89,7 @@ public class DeveloperUtilities {
                         });
 
                         try {
-                            Thread.sleep(500, 0);
+                            Thread.sleep(100, 0);
                         } catch (InterruptedException e) {
                             logger.log(e.toString());
                         }

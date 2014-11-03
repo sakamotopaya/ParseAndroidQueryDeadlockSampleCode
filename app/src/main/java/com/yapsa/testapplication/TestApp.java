@@ -16,7 +16,7 @@ public class TestApp extends Application {
 
         ParseObject.registerSubclass(TestData.class);
 
-        Parse.initialize(this, "YOUR_APP_KEY_HERE", "YOUR_CLIENT_KEY_HERE");
+        Parse.initialize(this, "YOUR_APP_ID_HERE", "YOUR_CLIENT_KEY_HERE");
         ParseUser.enableAutomaticUser();
         Parse.setLogLevel(Parse.LOG_LEVEL_DEBUG);
     }
