@@ -33,7 +33,7 @@ public class DeveloperUtilities {
         for (int i = 0; i < 200; i++){
             TestData data = new TestData();
             data.setTestValue(i + 1);
-            data.setTestString("This is a test string " + String.valueOf(1+1));
+            data.setTestString("This is a test string " + String.valueOf(i+1));
             try {
                 logger.log("Creating test object " + String.valueOf(i));
                 data.save();
@@ -52,9 +52,9 @@ public class DeveloperUtilities {
 
     public void runAsyncTest() {
 
-        AsyncTask task = new AsyncTask() {
-            @Override
-            protected Object doInBackground(Object[] params) {
+        //AsyncTask task = new AsyncTask() {
+           // @Override
+            //protected Object doInBackground(Object[] params) {
 
                 final List<ParseQuery<TestData>> queryIndex = Collections.synchronizedList(new ArrayList<ParseQuery<TestData>>());
 
@@ -80,6 +80,12 @@ public class DeveloperUtilities {
                             @Override
                             public void done(List<TestData> testData, ParseException e) {
 
+                                try {
+                                    Thread.sleep(100, 0);
+                                } catch (InterruptedException ex) {
+                                    logger.log(ex.toString());
+                                }
+
                                 if (e == null) {
                                     logger.log("Query " + String.valueOf(queryNumber) + "completed successfully.");
                                     queryIndex.remove(query);
@@ -88,11 +94,11 @@ public class DeveloperUtilities {
                             }
                         });
 
-                        try {
-                            Thread.sleep(100, 0);
-                        } catch (InterruptedException e) {
-                            logger.log(e.toString());
-                        }
+//                        try {
+//                            Thread.sleep(100, 0);
+//                        } catch (InterruptedException e) {
+//                            logger.log(e.toString());
+//                        }
                     }
 
                     logger.log("Query run complete");
@@ -100,11 +106,11 @@ public class DeveloperUtilities {
                     logger.log(e.toString());
                     logger.log("Exception caused test to stop");
                 }
-                return null;
-            }
-        };
+                //return null;
+            //}
+        //};
 
-        task.execute();
+        //task.execute();
     }
 
 

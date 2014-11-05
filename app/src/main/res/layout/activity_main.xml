@@ -20,6 +20,12 @@
         android:layout_height="wrap_content"
         android:text="Async Test"/>
 
+    <Button
+        android:id="@+id/dev_test_list"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="Test List"/>
+
     <TextView
         android:id="@+id/dev_log"
         android:layout_marginTop="20dp"

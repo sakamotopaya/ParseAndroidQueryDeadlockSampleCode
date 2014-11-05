@@ -1,6 +1,7 @@
 package com.yapsa.testapplication;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
@@ -37,6 +38,16 @@ public class MainActivity extends Activity implements ILog {
                 log.setText("");
                 DeveloperUtilities utility = new DeveloperUtilities(MainActivity.this);
                 utility.runAsyncTest();
+            }
+        });
+
+        Button testList = (Button) findViewById(R.id.dev_test_list);
+        testList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                log.setText("");
+                Intent intent = new Intent(MainActivity.this, TestListActivity.class);
+                startActivity(intent);
             }
         });
     }
