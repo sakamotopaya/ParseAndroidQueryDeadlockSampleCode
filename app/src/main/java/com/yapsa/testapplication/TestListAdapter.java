@@ -22,16 +22,19 @@ import java.util.Map;
 public class TestListAdapter extends ArrayAdapter<TestModel> {
     private static final String TAG = TestListAdapter.class.getSimpleName();
 
+    private static final int FROM_LOCAL = 0;
+    private static final int FROM_CACHE = 1;
+    private static final int FROM_CLOUD = 2;
+    private static final int FROM_ASYNC = 3;
+
     private ArrayList<TestModel> items;
     private Map<Integer, TestData> cacheData = Collections.synchronizedMap(new HashMap<Integer, TestData>());
+    private boolean useDroidAsync = false;
 
-    public TestListAdapter(Context context, int resource, ArrayList<TestModel> items) {
+    public TestListAdapter(Context context, int resource, ArrayList<TestModel> items, boolean useDroidAsync) {
         super(context, resource, items);
-        init(items);
-    }
 
-    private void init(ArrayList<TestModel> items) {
-
+        this.useDroidAsync = useDroidAsync;
         this.items = items;
 
     }
@@ -72,62 +75,117 @@ public class TestListAdapter extends ArrayAdapter<TestModel> {
             holder.reuseCount++;
 
         final TestItemHolder tempHolder = holder;
-        tempHolder.itemText.setText(getDescription(object, object.itemText, null, tempHolder, false, null));
+        tempHolder.itemText.setText(getDescription(object, object.itemText, null, tempHolder, FROM_LOCAL, null));
 
         if (!cacheData.containsKey(object.itemId)) {
 
-            if (tempHolder.query != null) {
-                final ParseQuery tempQuery = tempHolder.query;
-                tempHolder.query = null;
-                Log.d(TAG, "cancelling query");
+            if (useDroidAsync) {
+                if (tempHolder.asyncTask != null) {
+                    tempHolder.query = null;
+                    tempHolder.asyncTask.cancel(true);
+                    tempHolder.asyncTask = null;
+                }
+            } else {
+                if (tempHolder.query != null) {
+                    final ParseQuery tempQuery = tempHolder.query;
+                    tempHolder.query = null;
+                    Log.d(TAG, "cancelling query");
 
+                    AsyncTask task = new AsyncTask() {
+                        @Override
+                        protected Object doInBackground(Object[] objects) {
+                            tempQuery.cancel();
+                            Log.d(TAG, "query canceled");
+                            return null;
+                        }
+                    };
+
+                    task.execute();
+
+                }
+            }
+
+
+
+            if (useDroidAsync) {
                 AsyncTask task = new AsyncTask() {
                     @Override
                     protected Object doInBackground(Object[] objects) {
-                        tempQuery.cancel();
-                        Log.d(TAG, "query canceled");
+                        try {
+                            Thread.sleep(100, 0);
+
+                            final TestData model = new TestData();
+                            model.setTestString("From async test");
+                            model.setTestValue(object.itemId);
+
+                            cacheData.put(model.getTestValue(), model);
+
+                            tempHolder.itemText.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    tempHolder.itemText.setText(getDescription(object, model.getTestString(), model, tempHolder, FROM_ASYNC, null));
+                                }
+                            });
+                            tempHolder.asyncTask = null;
+
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        tempHolder.query = null;
+                        tempHolder.asyncTask = null;
+
                         return null;
                     }
                 };
 
+                tempHolder.asyncTask = task;
                 task.execute();
 
+            } else {
+
+                // Run a query to get the data
+                final ParseQuery<TestData> query = ParseQuery.getQuery(TestData.class);
+                query.whereEqualTo(TestData.Field_TestValue, object.itemId);
+                tempHolder.query = query;
+
+                query.findInBackground(new FindCallback<TestData>() {
+                    @Override
+                    public void done(List<TestData> testDatas, ParseException e) {
+                        tempHolder.query = null;
+                        if (e == null) {
+                            if (testDatas.size() > 0) {
+                                TestData model = testDatas.get(0);
+                                cacheData.put(model.getTestValue(), model);
+                                tempHolder.itemText.setText(getDescription(object, model.getTestString(), model, tempHolder, FROM_CLOUD, e));
+                            }
+                        } else
+                            Log.e(TAG, e.getMessage(), e);
+
+                        Thread.currentThread().interrupt();
+
+                    }
+                });
             }
-
-            // Run a query to get the data
-            ParseQuery<TestData> query = ParseQuery.getQuery(TestData.class);
-            query.whereEqualTo(TestData.Field_TestValue, object.itemId);
-            tempHolder.query = query;
-
-            query.findInBackground(new FindCallback<TestData>() {
-                @Override
-                public void done(List<TestData> testDatas, ParseException e) {
-                    tempHolder.query = null;
-                    if (e == null) {
-                        if (testDatas.size() > 0) {
-                            TestData model = testDatas.get(0);
-                            cacheData.put(model.getTestValue(), model);
-                            tempHolder.itemText.setText(getDescription(object, model.getTestString(), model, tempHolder, false, e));
-                        }
-                    } else
-                        Log.e(TAG, e.getMessage(), e);
-                }
-            });
         } else {
             TestData model = cacheData.get(object.itemId);
-            tempHolder.itemText.setText(getDescription(object, model.getTestString(), model, tempHolder, true, null));
+            tempHolder.itemText.setText(getDescription(object, model.getTestString(), model, tempHolder, FROM_CACHE, null));
         }
 
         return v;
     }
 
-    private String getDescription(TestModel model, String description, TestData data, TestItemHolder holder, boolean fromCache, Exception e) {
+    private String getDescription(TestModel model, String description, TestData data, TestItemHolder holder, int source, Exception e) {
         String buf = "Source: ";
 
-        if (data == null)
+        if (source == FROM_LOCAL)
             buf += "Local\r\n";
-        else
+        else if (source == FROM_CLOUD)
             buf += "Cloud\r\n";
+        else if (source == FROM_ASYNC)
+            buf += "Async\r\n";
+        else if (source == FROM_CACHE)
+            buf += "Cache\r\n";
 
         buf += "Index: ";
         buf += String.valueOf(model.itemId);
@@ -137,15 +195,11 @@ public class TestListAdapter extends ArrayAdapter<TestModel> {
         buf += description;
         buf += "\r\n";
 
-        buf += "Form cache: ";
-        buf += fromCache ? "true" : "false";
-        buf += "\r\n";
-
         buf += "Row reuse count: ";
         buf += holder.reuseCount;
         buf += "\r\n";
 
-        if (!fromCache && data != null){
+        if (source == FROM_CLOUD && data != null) {
             if (e == null)
                 buf += "Query completed successfully\r\n";
             else {
@@ -160,6 +214,7 @@ public class TestListAdapter extends ArrayAdapter<TestModel> {
     }
 
     class TestItemHolder {
+        public AsyncTask asyncTask;
         public int reuseCount = 0;
         public TextView itemText;
         public ParseQuery query;

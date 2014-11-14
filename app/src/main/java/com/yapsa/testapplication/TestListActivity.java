@@ -26,7 +26,8 @@ public class TestListActivity extends Activity {
             items.add(model);
         }
 
-        TestListAdapter adapter = new TestListAdapter(this, R.id.item_text, items);
+        boolean useDroidAsync = getIntent().getBooleanExtra(MainActivity.USEDROIDASYNC, false);
+        TestListAdapter adapter = new TestListAdapter(this, R.id.item_text, items, useDroidAsync);
         listView.setAdapter(adapter);
     }
 

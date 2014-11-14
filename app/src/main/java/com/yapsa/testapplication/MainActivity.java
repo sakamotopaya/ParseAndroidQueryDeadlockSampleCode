@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity implements ILog {
 
+    public static String USEDROIDASYNC = "USEDROIDASYNC";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +49,19 @@ public class MainActivity extends Activity implements ILog {
             public void onClick(View v) {
                 log.setText("");
                 Intent intent = new Intent(MainActivity.this, TestListActivity.class);
+                intent.putExtra(USEDROIDASYNC, false);
+                startActivity(intent);
+            }
+        });
+
+        Button droidAyncTestList = (Button) findViewById(R.id.dev_test_droidasync);
+        droidAyncTestList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                log.setText("");
+                Bundle b = new Bundle();
+                Intent intent = new Intent(MainActivity.this, TestListActivity.class);
+                intent.putExtra(USEDROIDASYNC, true);
                 startActivity(intent);
             }
         });
