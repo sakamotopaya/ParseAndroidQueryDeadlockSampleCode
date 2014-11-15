@@ -111,12 +111,14 @@ public class TestListAdapter extends ArrayAdapter<TestModel> {
                 AsyncTask task = new AsyncTask() {
                     @Override
                     protected Object doInBackground(Object[] objects) {
-                        try {
-                            Thread.sleep(100, 0);
+                        //try {
+                            //Thread.sleep(1000, 0);
 
-                            final TestData model = new TestData();
-                            model.setTestString("From async test");
-                            model.setTestValue(object.itemId);
+                            final TestData model = HttpUtilities.getTestData(object.itemId);
+
+                            //final TestData model = new TestData();
+                            //model.setTestString("From async test");
+                            //model.setTestValue(object.itemId);
 
                             cacheData.put(model.getTestValue(), model);
 
@@ -128,9 +130,9 @@ public class TestListAdapter extends ArrayAdapter<TestModel> {
                             });
                             tempHolder.asyncTask = null;
 
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                        //} catch (InterruptedException e) {
+                        //    e.printStackTrace();
+                        //}
 
                         tempHolder.query = null;
                         tempHolder.asyncTask = null;
