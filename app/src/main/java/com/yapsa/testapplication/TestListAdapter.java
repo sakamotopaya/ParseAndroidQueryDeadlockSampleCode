@@ -22,10 +22,10 @@ import java.util.Map;
 public class TestListAdapter extends ArrayAdapter<TestModel> {
     private static final String TAG = TestListAdapter.class.getSimpleName();
 
-    private static final int FROM_LOCAL = 0;
-    private static final int FROM_CACHE = 1;
-    private static final int FROM_CLOUD = 2;
-    private static final int FROM_ASYNC = 3;
+    public static final int FROM_LOCAL = 0;
+    public static final int FROM_CACHE = 1;
+    public static final int FROM_CLOUD = 2;
+    public static final int FROM_ASYNC = 3;
 
     private ArrayList<TestModel> items;
     private Map<Integer, TestData> cacheData = Collections.synchronizedMap(new HashMap<Integer, TestData>());
@@ -177,7 +177,7 @@ public class TestListAdapter extends ArrayAdapter<TestModel> {
         return v;
     }
 
-    private String getDescription(TestModel model, String description, TestData data, TestItemHolder holder, int source, Exception e) {
+    public String getDescription(TestModel model, String description, TestData data, TestItemHolder holder, int source, Exception e) {
         String buf = "Source: ";
 
         if (source == FROM_LOCAL)
@@ -215,15 +215,6 @@ public class TestListAdapter extends ArrayAdapter<TestModel> {
         return buf;
     }
 
-    class TestItemHolder {
-        public AsyncTask asyncTask;
-        public int reuseCount = 0;
-        public TextView itemText;
-        public ParseQuery query;
-        TestData data;
 
-        public TestItemHolder(View v) {
-            itemText = (TextView) v.findViewById(R.id.item_text);
-        }
-    }
 }
+

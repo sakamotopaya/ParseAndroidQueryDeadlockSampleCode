@@ -32,6 +32,12 @@
         android:layout_height="wrap_content"
         android:text="Droid Async Test List"/>
 
+    <Button
+        android:id="@+id/dev_parse_adapter"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:text="Test Parse Adapter"/>
+
     <TextView
         android:id="@+id/dev_log"
         android:layout_marginTop="20dp"

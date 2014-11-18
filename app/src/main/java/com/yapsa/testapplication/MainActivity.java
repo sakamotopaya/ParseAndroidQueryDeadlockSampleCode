@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 
 public class MainActivity extends Activity implements ILog {
 
@@ -65,13 +67,22 @@ public class MainActivity extends Activity implements ILog {
                 startActivity(intent);
             }
         });
-    }
 
+        Button parseAdapterTest = (Button) findViewById(R.id.dev_parse_adapter);
+        parseAdapterTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                log.setText("");
+                Intent intent = new Intent(MainActivity.this, TestParseQueryAdapterActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        String json = "{\"Messages\":[],\"ResponseEntity\":[{\"Messages\":[],\"UserId\":1}]}";
+        Gson gson = new Gson();
         return true;
     }
 
@@ -91,6 +102,7 @@ public class MainActivity extends Activity implements ILog {
     }
 
     TextView log;
+
     @Override
     public void log(final String text) {
 
